@@ -1,6 +1,6 @@
 {
     "name": "stop motion",
-    "main": "index.html",
+    "main": "main.js",
     "version": "0.5.1",
     "livereload": false,
     "single-instance": false,

@@ -108,12 +108,9 @@ app.service('Video', function() {
         }
 
         function cuando_obtiene_stream(stream) {
-          video.src = window.URL.createObjectURL(stream);
+          video.srcObject = stream;
           callback_respuesta("html5");
         }
-
-        window.URL = window.URL || window.webkitURL;
-        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
         if (navigator.getUserMedia) {
           var medios = {audio: false, video: true};

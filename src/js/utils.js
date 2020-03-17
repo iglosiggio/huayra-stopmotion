@@ -3,8 +3,7 @@ window.onerror = function(e) {
 };
 
 window.mostrar_herramientas_de_desarrollo = function() {
-  var w = gui.Window.get();
-  w.showDevTools();
+  require('./nw-wrapper').Window.get().openDevTools();
 };
 
 window.mostrar = function(elemento, ruta_a_imagen) {

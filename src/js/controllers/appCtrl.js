@@ -1,4 +1,4 @@
-var gui = require('nw.gui');
+const gui = require('./nw-wrapper');
 var fs = require('fs');
 var path = require('path');
 var ffmpeg = require('./js/ffmpeg-mock');
@@ -177,22 +177,16 @@ app.controller('AppCtrl', function ($scope, $modal, Video, Paneles, Preferencias
 
     $scope.exportar_video = function(proyecto, formato, size) {
 
-      var dialogo_exportar = document.getElementById('dialogo-exportar');
-
       function abrir_dialogo_exportar(proyecto, formato) {
-
-        var dialogo = document.getElementById('dialogo-exportar');
-
         // Itentando cambiar el nombre de archivo a grabar.
-        dialogo.setAttribute('accept', formato.extension);
-        dialogo.setAttribute('nwsaveas', 'ejemplo' + formato.extension);
+        const showSaveDialog = require('electron').remote.dialog.showSaveDialog;
 
-        dialogo.click();
-
-        dialogo.onchange = function(evento) {
-          var that = this;
-          var archivo = this.value;
-          this.value = "";
+        showSaveDialog({
+          defaultPath: `nombre${formato.extension}`,
+          filters: [{ name: `Vídeo (${formato.extension})`, extensions: [formato.extension.slice(1)] }],
+        }).then(({ canceled, filePath: archivo }) => {
+          if (canceled)
+            return;
 
           proyecto.exportar_imagenes().then(function(directorio_temporal) {
             var tamano, proc;
@@ -378,7 +372,7 @@ app.controller('AppCtrl', function ($scope, $modal, Video, Paneles, Preferencias
             $scope.pagina = "progreso";
             $scope.$apply();
           });
-        };
+        });
       }
 
       abrir_dialogo_exportar(proyecto, formato);
@@ -968,9 +962,7 @@ app.controller('AppCtrl', function ($scope, $modal, Video, Paneles, Preferencias
 
 
   $scope.abrir_modo_desarrollador = function() {
-    var gui = require('nw.gui');
-    var w = gui.Window.get();
-    w.showDevTools();
+    gui.Window.get().openDevTools();
   };
 
   window.borrar = function() {
@@ -1039,14 +1031,16 @@ app.controller('AppCtrl', function ($scope, $modal, Video, Paneles, Preferencias
   };
 
   window.realmente_abrir_proyecto = function(success_callback){
-    var openDialog = document.getElementById('open-dialog');
-    openDialog.click();
+    const showOpenDialog = require('electron').remote.dialog.showOpenDialog;
 
-    openDialog.onchange = function(evento) {
-      var archivo = this.value;
-      this.value = ""; // Hace que se pueda seleccionar el archivo nuevamente.
+    showOpenDialog({
+      filters: [{ name: 'Proyecto de Huayra Motion (.hmotion)', extensions: ['hmotion'] }],
+    }).then(({ canceled, filePaths: [archivo] }) => {
+      if (canceled)
+        return;
+
       abrir_proyecto_desde_ruta(archivo, success_callback);
-    };
+    });
   }
 
   window.abrir_proyecto = function(success_callback) {
@@ -1083,16 +1077,19 @@ app.controller('AppCtrl', function ($scope, $modal, Video, Paneles, Preferencias
   };
 
   window.guardar_proyecto_como = function() {
-    var saveDialog = document.getElementById('save-dialog');
-    saveDialog.click();
+    const showSaveDialog = require('electron').remote.dialog.showSaveDialog;
 
-    saveDialog.onchange = function(evento) {
-      var archivo = this.value;
-      this.value = '';
+    showSaveDialog({
+      defaultPath: 'proyecto.hmotion',
+      filters: [{ name: 'Proyecto de Huayra Motion (.hmotion)', extensions: ['hmotion'] }],
+    }).then(({ canceled, filePath: archivo }) => {
+      if (canceled)
+        return;
+
       Proyecto.guardar(archivo);
       Preferencias.agregar_proyecto_reciente(archivo);
       $scope.abrir_proyecto(archivo);
-    };
+    });
   };
 
   var config = require('./package.json');
@@ -1105,12 +1102,10 @@ app.controller('AppCtrl', function ($scope, $modal, Video, Paneles, Preferencias
     var http = require('http');
 
     var app = express();
-    var server = http.createServer(app);
+    app.set('port', 3000 + Math.floor(Math.random() * 1000));
+    app.use(express.static('public'));
 
-    app.configure(function(){
-      app.set('port', 3000 + Math.floor(Math.random() * 1000));
-      app.use(express.static('./public'));
-    });
+    var server = http.createServer(app);
 
     server.listen(app.get('port'), function(){
       var os = require("os");
@@ -1142,7 +1137,6 @@ app.controller('AppCtrl', function ($scope, $modal, Video, Paneles, Preferencias
     });
 
     var io = require("socket.io").listen(server);
-    io.set('log level', 1);
 
     io.sockets.on('connection', function (socket) {
 
@@ -1189,10 +1183,9 @@ app.controller('AppCtrl', function ($scope, $modal, Video, Paneles, Preferencias
     });
   }
 
+  window.onready = function(){
+    window.iniciar_nuevo_proyecto();
+    window.motion_ready = true;
+  };
 });
 
-
-window.onready = function(){
-  window.iniciar_nuevo_proyecto();
-  window.motion_ready = true;
-};

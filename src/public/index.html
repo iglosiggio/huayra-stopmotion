@@ -20,8 +20,6 @@
 
         <script src="/js/socket.io.js"></script>
 
-        <script></script>
-
     </head>
     <body>
 
@@ -94,13 +92,9 @@
                 alert("ERROR: es importante aceptar el pedido de la webcam.");
             };
 
-            window.URL = window.URL || window.webkitURL;
-            navigator.getUserMedia  = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-
             var video = document.querySelector('video');
-
-            if (navigator.getUserMedia) {
-                navigator.getUserMedia({audio: false, video: true}, function(stream) {
+            if (navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({audio: false, video: true}, function(stream) {
                     video.src = window.URL.createObjectURL(stream);
                     iniciar_sockets_y_transmision();
                 }, onFailSoHard);

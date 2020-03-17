@@ -62,7 +62,7 @@ app.directive('huayraVersion', function() {
       }
 
       $scope.abrir_link = function(url) {
-        var gui = require('nw.gui');
+        var gui = require('./nw-wrapper');
         gui.Shell.openExternal(url);
       };
 

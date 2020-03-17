@@ -2,7 +2,6 @@
 
 var app = angular.module('app');
 var fs = require('fs');
-var Promise = require('bluebird');
 var path = require('path');
 
 app.service('Proyecto', function(Menu, $q) {

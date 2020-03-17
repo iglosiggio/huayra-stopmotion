@@ -1,7 +1,7 @@
-var app = angular.module('app');
-var gui = require('nw.gui');
-
 app.service('Menu', function() {
+    var app = angular.module('app');
+    var gui = require('./nw-wrapper');
+
     var self = this;
     this.menubar = new gui.Menu({type: 'menubar'});
     this.menu_archivo = new gui.Menu();
@@ -113,29 +113,29 @@ app.service('Menu', function() {
             if ( match ){ return match[0]; }
             else{ return ""; }
           };
-      ventana.menu = this.menubar;
-
-      if( proyectos_recientes ){
+      if (proyectos_recientes) {
         //quitamos al placeholder
-        this.menu_recientes.removeAt(0);
+        this.menu_recientes.clear();
 
         for(var i=0; i < proyectos_recientes.length; i++ ){
           ruta = proyectos_recientes[i].ruta;
           nombre = nombre_proyecto( ruta );
-          item_reciente = new gui.MenuItem({label: nombre,
-                                            click:function(){
-                                              window.abrir_proyecto_desde_ruta(ruta,0);
-                                            }
-                                           });
+          item_reciente = new gui.MenuItem({
+            label: nombre,
+            click() {
+              window.abrir_proyecto_desde_ruta(ruta, 0);
+            }
+          });
           this.menu_recientes.append(item_reciente);
         }
+        ventana.setMenu(this.menubar);
       }
     };
 
     this.agregar_a_ventana = function(ventana, funcion_exportar, funcion_acerca_de) {
       console.log(funcion_exportar, funcion_acerca_de);
 
-      ventana.menu = this.menubar;
+      ventana.setMenu(this.menubar);
       this.funcion_exportar = funcion_exportar;
       this.funcion_acerca_de = funcion_acerca_de;
     };
